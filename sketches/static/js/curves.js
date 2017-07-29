@@ -24,7 +24,7 @@ var curr_alpha_step = 1;
 
 var curr_alpha = begin_alpha;
 var min_iter = 30;
-var max_iter = 200;
+var max_iter = 120;
 var iter;
 var last_frame;
 // var mx, my;
