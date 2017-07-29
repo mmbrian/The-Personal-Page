@@ -1,0 +1,347 @@
+<html>
+<head>
+	<meta charset="UTF-8">
+	<!-- <script language="javascript" src="libraries/jquery.js"></script> -->
+	<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+	<script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+
+	<!-- <script language="javascript" type="text/javascript" src="libraries/p5.js"></script> -->
+	<!-- uncomment lines below to include extra p5 libraries -->
+	<!-- <script language="javascript" src="libraries/p5.dom.js"></script> -->
+	<!-- <script language="javascript" src="libraries/p5.sound.js"></script> -->
+	<script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.4.21/p5.min.js"></script>
+	<script language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.4.21/addons/p5.dom.min.js"></script>
+	<script language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.4.21/addons/p5.sound.min.js"></script>
+
+	<link href='https://fonts.googleapis.com/css?family=Josefin+Sans:300' rel='stylesheet' type='text/css'>
+	<script language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/screenfull.js/3.0.0/screenfull.min.js"></script>
+
+	<script language="javascript" type="text/javascript" src="static/js/postprocessing.js"></script>
+	<!-- this line removes any default padding and style. you might only need one of these values set. -->
+	<style> body {padding: 0; margin: 0;} </style>
+
+	<style type="text/css">
+		body {
+			overflow: hidden;
+			background: url(static/other/postprocessing_assets/zwartevilt.png);
+
+			-webkit-box-shadow: inset 0px 0px 90px 13px rgba(0,0,0,0.75);
+			-moz-box-shadow: inset 0px 0px 90px 13px rgba(0,0,0,0.75);
+			box-shadow: inset 0px 0px 90px 13px rgba(0,0,0,0.75);
+		}
+
+		canvas:not(#myCanvas) {
+			-webkit-box-shadow: 7px 13px 30px 0px rgba(0,0,0,0.49);
+			-moz-box-shadow: 7px 13px 30px 0px rgba(0,0,0,0.49);
+			box-shadow: 7px 13px 30px 0px rgba(0,0,0,0.49);
+		}
+
+		#preloader {
+			position: fixed; 
+			left: 0; 
+			top: 0; 
+			right:0;
+	    	bottom:0;
+			background-color:#fff;
+			z-index:9999; /* makes sure it stays on top */
+		}
+
+		#status {
+			position:absolute;
+	        text-align: center;
+	        vertical-align: center;
+	        width: 100%;
+	        top: 50%; 
+			margin-top: -75px; /* half of preloader's height */
+		}
+
+		h2, h3 {
+			font-family: 'Josefin Sans', sans-serif;
+		}
+
+		iframe.bandcamp, .bandcamp_ready {
+			margin: 0 auto;
+			display: block;
+		}
+	</style>
+
+
+	<script type="text/javascript">
+		window.mobileTabletOrLowRes = function() {
+		  var check = false;
+		  (function(a){if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino|android|ipad|playbook|silk/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4)))check = true})(navigator.userAgent||navigator.vendor||window.opera);
+		  return check;// || (window.innerWidth <= 800 || window.innerHeight <= 600);
+		}
+
+		document.allowVisualization = false;
+		document.assetsLoaded = false;
+
+		var canvasWidth = 0;
+		var hCH, rhCH, hCW;
+		// var npts = 13;
+		var npts = 75;
+		var maxSpeed = 3;
+		var minSpeed = 2;
+		var xarr = [];
+		var yarr = [];
+		var darr = [], sdarr = []; // movement direction
+		var rarr = []; // region (top or bottom)
+
+		var display_wave = true;
+		var initiating_wave = true;
+		var wave_length = 0;
+		var wave_lspeed = 1;
+		var wave_lacceleration = 1.05;
+		var wave_maxl;
+
+		var kill_wave = false;
+		var dead_count = 0;
+
+		var initPts = function() {
+			xarr = [];
+			yarr = [];
+			darr = []; sdarr = [];
+			rarr = [];
+			initiating_wave = true;
+			wave_length = 0;
+			wave_lspeed = 1;
+
+			var min = hCW - wave_maxl;
+			var max = hCW + wave_maxl;
+			var step = (max - min) / npts;
+			var ycoeff = 0;
+			for (var i = 0; i <= npts; i++) {
+				xarr.push(min + i*step);
+				yarr.push(rhCH);
+				if (Math.random() > 0.5)
+					darr.push(1 * (minSpeed + Math.random() * (maxSpeed-minSpeed)));
+				else
+					darr.push(-1 * (minSpeed + Math.random() * (maxSpeed-minSpeed)));
+
+				if (Math.random() > 0.5)
+					rarr.push(1);
+				else
+					rarr.push(-1);
+			}
+
+			// smoothing movement speeds
+			// smoothing window length is 3
+			sdarr.push((darr[0] + darr[1]) / 2);
+			for (var i = 1; i < npts; i++) {
+				sdarr.push((darr[i-1] + darr[i] + darr[i+1]) / 3);
+			}
+			sdarr.push((darr[npts-1] + darr[npts]) / 2);
+		};
+
+		var mutate = function() {
+			var tmp;
+			for (var i = 1; i < npts; i++) {
+				tmp = yarr[i] + sdarr[i];
+				if (!kill_wave) {
+					if (
+						(tmp < rhCH - hCH || tmp > rhCH + hCH)
+					   ) {
+						sdarr[i] = -sdarr[i];
+						tmp = yarr[i] + sdarr[i];
+					}
+
+				} else {
+					if ((yarr[i] - rhCH) * (tmp - rhCH) <= 0) {
+						if (sdarr[i] != 0)
+							dead_count++;
+
+						sdarr[i] = 0;
+						tmp = rhCH;
+					} else {
+						sdarr[i] = tmp > rhCH ? -Math.abs(sdarr[i]) : Math.abs(sdarr[i]);	
+					}
+				}
+				yarr[i] = tmp;
+			}
+		};
+
+		
+		var drawWave = function() {
+			if (!display_wave) return;	
+
+			context.beginPath();
+			context.fillStyle = 'white';
+			context.fillRect(0, 0, canvasWidth, rhCH*2);
+
+			if (initiating_wave) {
+				if (wave_length > wave_maxl) {
+					wave_length = wave_maxl;
+					initiating_wave = false;
+				} else {
+					wave_length += wave_lspeed;
+					wave_lspeed *= wave_lacceleration;	
+				}
+
+				context.moveTo(hCW - wave_length, rhCH);
+				context.lineTo(hCW + wave_length, rhCH);
+				context.strokeStyle = '#000000';
+			} else {
+				// bezier path based on: 
+				// - http://stackoverflow.com/questions/1257168/how-do-i-create-a-bezier-curve-to-represent-a-smoothed-polyline
+				// - http://www.ibiblio.org/e-notes/Splines/Cardinal.htm
+				var tension = 2;
+				if (dead_count < npts - 1) {
+					context.moveTo(xarr[0], yarr[0]); // move to first point
+					// p(0)p
+					var p0px = (xarr[1] - xarr[0]) / tension;
+					var p0py = (yarr[1] - yarr[0]) / tension;
+					var ppts = [p0px, p0py];
+					for (var i = 0; i < npts-1; i+=1) {
+						// p(i+1)p
+						ppts.push((xarr[i+2] - xarr[i]) / tension);
+						ppts.push((yarr[i+2] - yarr[i]) / tension);
+						// retrieving pip and pip1p
+						pipx = ppts[i*2];
+						pipy = ppts[i*2+1];
+						pip1px = ppts[i*2+2];
+						pip1py = ppts[i*2+3];
+						// computing control points
+						cp1x = xarr[i] + pipx/3;
+						cp1y = yarr[i] + pipy/3;
+						cp2x = xarr[i+1] - pip1px/3;
+						cp2y = yarr[i+1] - pip1py/3;
+						context.bezierCurveTo(
+							cp1x, cp1y, cp2x, cp2y,
+							xarr[i+1], yarr[i+1]);
+						// context.moveTo(xarr[i], yarr[i]);
+					}	
+					// p(n)p
+					ppts.push((xarr[npts] - xarr[npts-1]) / tension);
+					ppts.push((yarr[npts] - yarr[npts-1]) / tension);
+					// retrieving pnm1p and pnp
+					pipx = ppts[(npts-1)*2];
+					pipy = ppts[(npts-1)*2+1];
+					pip1px = ppts[(npts-1)*2+2];
+					pip1py = ppts[(npts-1)*2+3];
+					// computing control points
+					cp1x = xarr[npts-1] + pipx/3;
+					cp1y = yarr[npts-1] + pipy/3;
+					cp2x = xarr[npts] - pip1px/3;
+					cp2y = yarr[npts] - pip1py/3;
+					context.bezierCurveTo(
+						cp1x, cp1y, cp2x, cp2y,
+						xarr[npts], yarr[npts]);
+
+				} else { // all dead
+					if (wave_length < 0) {
+						wave_length = 0;
+						display_wave = false;
+						// terminate preloader
+						clearInterval(preloaderTask);
+						jQuery('#status').fadeOut(); // will first fade out the loading animation
+			            jQuery('#preloader').delay(550).fadeOut('slow'); // will fade out the white DIV that covers the website.
+			            jQuery('body').delay(550).css({'overflow':'visible'});
+
+			            document.allowVisualization = true;
+					} else {
+						wave_length -= wave_lspeed;
+						wave_lspeed /= wave_lacceleration;	
+					}
+
+					context.moveTo(hCW - wave_length, rhCH);
+					context.lineTo(hCW + wave_length, rhCH);
+					context.strokeStyle = '#000000';		
+				}
+			}
+			context.stroke();
+		}; 
+
+		var resize_canvas = function() {
+			if (window.kill_wave_after_resize) {
+				window.kill_wave_after_resize = false;
+				// window.initVisualization();
+				window.starting_frame = startFrame();
+				$("h3.bandcamp_ready").hide();
+				$("iframe.bandcamp").hide();
+				
+				setTimeout(function() {
+					kill_wave = true;
+				}, 2000);
+			}
+
+			if (!display_wave) return;
+	        var canvas = document.getElementById("myCanvas");
+			var context = canvas.getContext('2d');
+	        if (context.canvas.width != window.innerWidth)
+	        {
+	        	context.canvas.width  = window.innerWidth;
+	        	canvasWidth = context.canvas.width;
+	        	hCW = canvasWidth/2;
+	        	hCH = 100/2;
+	        	rhCH = 150/2;
+	        	wave_maxl = hCW;
+	        	// wave_maxl = Math.min(100, hCW);
+	        	initPts();
+	        }
+	    };
+
+	    var preloaderTask;
+	    var canvas, context;
+		$(document).ready(function() {
+			window.kill_wave_after_resize = false;
+			if (window.mobileTabletOrLowRes()) {
+				console.log("Mobile/Low Res");
+				$("div#status").html("<h2>Please Open This Page in a Desktop Browser :)</h2>");
+				$("h3.bandcamp_ready").hide();
+				$("iframe.bandcamp").hide();
+			} else {
+				console.log("Fine");
+				$("h3.bandcamp_ready").click(function() {
+					console.log("Displaying Visualization");
+					// kill_wave = true;
+					window.kill_wave_after_resize = true;
+					if(window.innerWidth == screen.width && 
+					   window.innerHeight == screen.height) {
+						// already in full screen mode
+						resize_canvas();
+					} else {
+						if (screenfull.enabled) {screenfull.request();}
+					}
+				});
+
+				canvas = document.getElementById('myCanvas');
+				context = canvas.getContext('2d');
+
+				resize_canvas();
+				initPts();
+				preloaderTask = setInterval(function() {
+					if (!initiating_wave)
+						mutate();
+					drawWave();
+				}, 10);
+			}
+		});
+
+		//<![CDATA[
+	    jQuery(window).load(function() { // makes sure the whole site is loaded
+	    	// kill_wave = true;
+	    // 	setTimeout(function() {
+	    // 	    document.killWaveTask = setInterval(function() {
+					// if (document.assetsLoaded) {
+					// 	kill_wave = true;
+					// 	clearInterval(document.killWaveTask);
+					// }
+	    // 	    }, 10);
+	    // 	}, 2500);
+	    })
+	    //]]>
+	</script>
+</head>
+
+<body onresize="resize_canvas()">
+	<div id="preloader">
+		<div id="status">
+			<canvas id="myCanvas" height='150'></canvas>
+		</div>
+		<!-- remove width setting of the iframe -->
+		<!-- add class="bandcamp" -->
+		<iframe class="bandcamp" style="border: 0; height: 42px;" src="https://bandcamp.com/EmbeddedPlayer/album=3176200420/size=small/bgcol=333333/linkcol=2ebd35/track=3979470179/transparent=true/" seamless><a href="http://carbonbasedlifeforms.bandcamp.com/album/alt-01">ALT:01 by Carbon Based Lifeforms</a></iframe>
+		<h3 class="bandcamp_ready" style="cursor: pointer; cursor: hand; text-align: center; margin-top: 13px; border-bottom: 1px solid black; width: 125px;">Click Here</h3>
+	</div>
+</body>
+</html>

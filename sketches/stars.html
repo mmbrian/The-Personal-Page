@@ -1,0 +1,281 @@
+<html>
+<head>
+	<meta charset="UTF-8">
+	<!-- <script language="javascript" src="libraries/jquery.js"></script> -->
+	<script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+	<script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+
+	<!-- <script language="javascript" type="text/javascript" src="libraries/p5.js"></script> -->
+	<!-- uncomment lines below to include extra p5 libraries -->
+	<!-- <script language="javascript" src="libraries/p5.dom.js"></script> -->
+	<!-- <script language="javascript" src="libraries/p5.sound.js"></script> -->
+	<script language="javascript" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.4.21/p5.min.js"></script>
+	<script language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.4.21/addons/p5.dom.min.js"></script>
+	<script language="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.4.21/addons/p5.sound.min.js"></script>
+
+	<script language="javascript" type="text/javascript" src="static/js/stars.js"></script>
+	<!-- this line removes any default padding and style. you might only need one of these values set. -->
+	<style> body {padding: 0; margin: 0;} </style>
+	<title>Stars</title>
+
+	<style type="text/css">
+		body {
+			overflow: hidden;
+		}
+
+		#preloader {
+			position: fixed; 
+			left: 0; 
+			top: 0; 
+			right:0;
+	    	bottom:0;
+			background-color:#fff;
+			z-index:9999; /* makes sure it stays on top */
+		}
+
+		#status {
+			position:absolute;
+	        text-align: center;
+	        vertical-align: center;
+	        width: 100%;
+	        top: 50%; 
+			margin-top: -75px; /* half of preloader's height */
+		}
+	</style>
+
+
+	<script type="text/javascript">
+		document.allowVisualization = false;
+		document.assetsLoaded = false;
+
+		var canvasWidth = 0;
+		var hCH, rhCH, hCW;
+		// var npts = 13;
+		var npts = 75;
+		var maxSpeed = 3;
+		var minSpeed = 2;
+		var xarr = [];
+		var yarr = [];
+		var darr = [], sdarr = []; // movement direction
+		var rarr = []; // region (top or bottom)
+
+		var display_wave = true;
+		var initiating_wave = true;
+		var wave_length = 0;
+		var wave_lspeed = 1;
+		var wave_lacceleration = 1.05;
+		var wave_maxl;
+
+		var kill_wave = false;
+		var dead_count = 0;
+
+		var initPts = function() {
+			xarr = [];
+			yarr = [];
+			darr = []; sdarr = [];
+			rarr = [];
+			initiating_wave = true;
+			wave_length = 0;
+			wave_lspeed = 1;
+
+			var min = hCW - wave_maxl;
+			var max = hCW + wave_maxl;
+			var step = (max - min) / npts;
+			var ycoeff = 0;
+			for (var i = 0; i <= npts; i++) {
+				xarr.push(min + i*step);
+				yarr.push(rhCH);
+				if (Math.random() > 0.5)
+					darr.push(1 * (minSpeed + Math.random() * (maxSpeed-minSpeed)));
+				else
+					darr.push(-1 * (minSpeed + Math.random() * (maxSpeed-minSpeed)));
+
+				if (Math.random() > 0.5)
+					rarr.push(1);
+				else
+					rarr.push(-1);
+			}
+
+			// smoothing movement speeds
+			// smoothing window length is 3
+			sdarr.push((darr[0] + darr[1]) / 2);
+			for (var i = 1; i < npts; i++) {
+				sdarr.push((darr[i-1] + darr[i] + darr[i+1]) / 3);
+			}
+			sdarr.push((darr[npts-1] + darr[npts]) / 2);
+		};
+
+		var mutate = function() {
+			var tmp;
+			for (var i = 1; i < npts; i++) {
+				tmp = yarr[i] + sdarr[i];
+				if (!kill_wave) {
+					if (
+						(tmp < rhCH - hCH || tmp > rhCH + hCH)
+					   ) {
+						sdarr[i] = -sdarr[i];
+						tmp = yarr[i] + sdarr[i];
+					}
+
+				} else {
+					if ((yarr[i] - rhCH) * (tmp - rhCH) <= 0) {
+						if (sdarr[i] != 0)
+							dead_count++;
+
+						sdarr[i] = 0;
+						tmp = rhCH;
+					} else {
+						sdarr[i] = tmp > rhCH ? -Math.abs(sdarr[i]) : Math.abs(sdarr[i]);	
+					}
+				}
+				yarr[i] = tmp;
+			}
+		};
+
+		
+		var drawWave = function() {
+			if (!display_wave) return;	
+
+			context.beginPath();
+			context.fillStyle = 'white';
+			context.fillRect(0, 0, canvasWidth, rhCH*2);
+
+			if (initiating_wave) {
+				if (wave_length > wave_maxl) {
+					wave_length = wave_maxl;
+					initiating_wave = false;
+				} else {
+					wave_length += wave_lspeed;
+					wave_lspeed *= wave_lacceleration;	
+				}
+
+				context.moveTo(hCW - wave_length, rhCH);
+				context.lineTo(hCW + wave_length, rhCH);
+				context.strokeStyle = '#000000';
+			} else {
+				// bezier path based on: 
+				// - http://stackoverflow.com/questions/1257168/how-do-i-create-a-bezier-curve-to-represent-a-smoothed-polyline
+				// - http://www.ibiblio.org/e-notes/Splines/Cardinal.htm
+				var tension = 2;
+				if (dead_count < npts - 1) {
+					context.moveTo(xarr[0], yarr[0]); // move to first point
+					// p(0)p
+					var p0px = (xarr[1] - xarr[0]) / tension;
+					var p0py = (yarr[1] - yarr[0]) / tension;
+					var ppts = [p0px, p0py];
+					for (var i = 0; i < npts-1; i+=1) {
+						// p(i+1)p
+						ppts.push((xarr[i+2] - xarr[i]) / tension);
+						ppts.push((yarr[i+2] - yarr[i]) / tension);
+						// retrieving pip and pip1p
+						pipx = ppts[i*2];
+						pipy = ppts[i*2+1];
+						pip1px = ppts[i*2+2];
+						pip1py = ppts[i*2+3];
+						// computing control points
+						cp1x = xarr[i] + pipx/3;
+						cp1y = yarr[i] + pipy/3;
+						cp2x = xarr[i+1] - pip1px/3;
+						cp2y = yarr[i+1] - pip1py/3;
+						context.bezierCurveTo(
+							cp1x, cp1y, cp2x, cp2y,
+							xarr[i+1], yarr[i+1]);
+						// context.moveTo(xarr[i], yarr[i]);
+					}	
+					// p(n)p
+					ppts.push((xarr[npts] - xarr[npts-1]) / tension);
+					ppts.push((yarr[npts] - yarr[npts-1]) / tension);
+					// retrieving pnm1p and pnp
+					pipx = ppts[(npts-1)*2];
+					pipy = ppts[(npts-1)*2+1];
+					pip1px = ppts[(npts-1)*2+2];
+					pip1py = ppts[(npts-1)*2+3];
+					// computing control points
+					cp1x = xarr[npts-1] + pipx/3;
+					cp1y = yarr[npts-1] + pipy/3;
+					cp2x = xarr[npts] - pip1px/3;
+					cp2y = yarr[npts] - pip1py/3;
+					context.bezierCurveTo(
+						cp1x, cp1y, cp2x, cp2y,
+						xarr[npts], yarr[npts]);
+
+				} else { // all dead
+					if (wave_length < 0) {
+						wave_length = 0;
+						display_wave = false;
+						// terminate preloader
+						clearInterval(preloaderTask);
+						jQuery('#status').fadeOut(); // will first fade out the loading animation
+			            jQuery('#preloader').delay(550).fadeOut('slow'); // will fade out the white DIV that covers the website.
+			            jQuery('body').delay(550).css({'overflow':'visible'});
+
+			            document.allowVisualization = true;
+					} else {
+						wave_length -= wave_lspeed;
+						wave_lspeed /= wave_lacceleration;	
+					}
+
+					context.moveTo(hCW - wave_length, rhCH);
+					context.lineTo(hCW + wave_length, rhCH);
+					context.strokeStyle = '#000000';		
+				}
+			}
+			context.stroke();
+		}; 
+
+		var resize_canvas = function() {
+			if (!display_wave) return;
+	        var canvas = document.getElementById("myCanvas");
+			var context = canvas.getContext('2d');
+	        if (context.canvas.width != window.innerWidth)
+	        {
+	        	context.canvas.width  = window.innerWidth;
+	        	canvasWidth = context.canvas.width;
+	        	hCW = canvasWidth/2;
+	        	hCH = 100/2;
+	        	rhCH = 150/2;
+	        	wave_maxl = hCW;
+	        	// wave_maxl = Math.min(100, hCW);
+	        	initPts();
+	        }
+	    };
+
+	    var preloaderTask;
+	    var canvas, context;
+		$(document).ready(function() {
+			canvas = document.getElementById('myCanvas');
+			context = canvas.getContext('2d');
+
+			resize_canvas();
+			initPts();
+			preloaderTask = setInterval(function() {
+				if (!initiating_wave)
+					mutate();
+				drawWave();
+			}, 10);
+		});
+
+		//<![CDATA[
+	    jQuery(window).load(function() { // makes sure the whole site is loaded
+	    	// kill_wave = true;
+	    	setTimeout(function() {
+	    	    document.killWaveTask = setInterval(function() {
+					if (document.assetsLoaded) {
+						kill_wave = true;
+						clearInterval(document.killWaveTask);
+					}
+	    	    }, 10);
+	    	}, 2500);
+	    })
+	    //]]>
+	</script>
+</head>
+
+<body onresize="resize_canvas()">
+	<div id="preloader">
+		<div id="status">
+			<canvas id="myCanvas" height='150'></canvas>
+		</div>
+	</div>
+</body>
+</html>
