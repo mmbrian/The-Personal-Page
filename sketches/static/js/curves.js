@@ -24,7 +24,7 @@ var p3c1x, p3c2x, p3c1y, p3c2y;
 var p4c1x, p4c2x, p4c1y, p4c2y;
 
 var begin_alpha = 0;
-var end_alpha = 255;
+var end_alpha = 200;
 var alpha_steps = 13;
 var curr_alpha_step = 1;
 
@@ -186,7 +186,7 @@ function main() {
 
 	var alpha_min = ((curr_alpha_step-1)/alpha_steps)*(end_alpha-begin_alpha);
 	var alpha_max = (curr_alpha_step/alpha_steps)*(end_alpha-begin_alpha);
-	curr_alpha = 255-lerp(alpha_min, alpha_max, amt);
+	curr_alpha = 200-lerp(alpha_min, alpha_max, amt);
 
 	drawBezierCurve(ox1, ox2, ox3, ox4, oy1, oy2, oy3, oy4);
 
@@ -225,7 +225,7 @@ function drawBezierCurve(ox1, ox2, ox3, ox4, oy1, oy2, oy3, oy4) {
 	// Connect the end points of this curve and the one from previous frame
 	noFill();
 	// fill(0,0,255);
-	stroke(0,0,0);
+	stroke(0,0,0,150);
 	// noStroke();
 	beginShape();
 	vertex(ox1, oy1);
@@ -272,33 +272,49 @@ function updateTransitionCurves() {
 	/// choosing how transition curves for each bezier point should be in
 	/// the next round
 	///////////////////////////////////////////////////////////////////// 
-	/// make sure previous curve and new curve have a C1 junction
-	// p1 moved on the curve defined by x1p > p1c1 > p1c2 > x1n
-	// therefore the new p1c1 should be colinear with x1n and p1c2
-	// (for C1 the length should also be the same)
-	var dx = x1p-p1c2x, dy = y1p-p1c2y;
-	p1c1x = x1p + dx;
-	p1c1y = y1p + dy;
-	dx = x2p-p2c2x, dy = y2p-p2c2y;
-	p2c1x = x2p + dx;
-	p2c1y = y2p + dy;
-	dx = x3p-p3c2x, dy = y3p-p3c2y;
-	p3c1x = x3p + dx;
-	p3c1y = y3p + dy;
-	dx = x4p-p4c2x, dy = y4p-p4c2y;
-	p4c1x = x4p + dx;
-	p4c1y = y4p + dy;
+	// if (random()>0.5) {
+		/// make sure previous curve and new curve have a C1 junction
+		// p1 moved on the curve defined by x1p > p1c1 > p1c2 > x1n
+		// therefore the new p1c1 should be colinear with x1n and p1c2
+		// (for C1 the length should also be the same)
+		
+		// var new_curve = fixCurve(new Array(x1p, y1p, x2p, y2p, x3p, y3p));
+		// x2p = new_curve[0], y2p = new_curve[1];
+		// x3p = new_curve[2], y3p = new_curve[3];
 
-	p1c2x = randX(), p2c2x = randX(), p3c2x = randX(), p4c2x = randX();
-	p1c2y = randY(), p2c2y = randY(), p3c2y = randY(), p4c2y = randY();
+		// new_curve = fixCurve(new Array(x1n, y1n, x2n, y2n, x3n, y3n));
+		// x2n = new_curve[0], y2n = new_curve[1];
+		// x3n = new_curve[2], y3n = new_curve[3];
 
-	// /// Curves have a C0 junction
-	// p1c1x = randX(), p2c1x = randX(), p3c1x = randX(), p4c1x = randX();
-	// p1c2x = randX(), p2c2x = randX(), p3c2x = randX(), p4c2x = randX();
-	// p1c1y = randY(), p2c1y = randY(), p3c1y = randY(), p4c1y = randY();
-	// p1c2y = randY(), p2c2y = randY(), p3c2y = randY(), p4c2y = randY();
 
-	// fixCurves();
+		var dx = x1p-p1c2x, dy = y1p-p1c2y;
+		p1c1x = x1p + dx;
+		p1c1y = y1p + dy;
+		dx = x2p-p2c2x, dy = y2p-p2c2y;
+		p2c1x = x2p + dx;
+		p2c1y = y2p + dy;
+		dx = x3p-p3c2x, dy = y3p-p3c2y;
+		p3c1x = x3p + dx;
+		p3c1y = y3p + dy;
+		dx = x4p-p4c2x, dy = y4p-p4c2y;
+		p4c1x = x4p + dx;
+		p4c1y = y4p + dy;
+
+		p1c2x = randX(), p2c2x = randX(), p3c2x = randX(), p4c2x = randX();
+		p1c2y = randY(), p2c2y = randY(), p3c2y = randY(), p4c2y = randY();
+
+
+		
+
+	// } else {
+	// 	/// Curves have a C0 junction
+	// 	p1c1x = randX(), p2c1x = randX(), p3c1x = randX(), p4c1x = randX();
+	// 	p1c2x = randX(), p2c2x = randX(), p3c2x = randX(), p4c2x = randX();
+	// 	p1c1y = randY(), p2c1y = randY(), p3c1y = randY(), p4c1y = randY();
+	// 	p1c2y = randY(), p2c2y = randY(), p3c2y = randY(), p4c2y = randY();
+
+	// 	fixCurves();
+	// }
 	///////////////////////////////////////////////////////////////////// 
 }
 
@@ -322,7 +338,7 @@ function updateIter() {
 
 function randSelect(a) {
 	// return randomGaussian(0.5, 0.3)*a; // mean, sd
-	return normalcdf(0.5, 0.5, random())*a; // mean, sd, to
+	return normalcdf(0.5, 0.8, random())*a; // mean, sd, to
 	// return random(a);
 
 }
