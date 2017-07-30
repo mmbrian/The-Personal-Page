@@ -121,12 +121,12 @@ function intersect(px, py, qx, qy, rx, ry, ux, uy) {
 
 function randX() {
 	// return random(xmin, xmax+1);
-	return randSelect(xmax-xmin)+xmin;
+	return randSelect(xmax-xmin, 0)+xmin;
 }
 
 function randY() {
 	// return random(ymin, ymax+1);
-	return randSelect(ymax-ymin)+ymin;
+	return randSelect(ymax-ymin, 1)+ymin;
 }
 
 function windowResized() {
@@ -138,7 +138,14 @@ function mouseDragged() {
 }
 
 function keyPressed() {
-	restart();
+	switch (keyCode) {
+		case 32: // Space key
+		case ENTER: // enter key
+			restart();
+			break;
+		default:
+			break;
+	}
 }
 function restart() {
 	clear();
@@ -233,7 +240,7 @@ function drawBezierCurve(ox1, ox2, ox3, ox4, oy1, oy2, oy3, oy4) {
 	vertex(x4, y4);
 	bezierVertex(x3, y3, x2, y2, x1, y1);
 	// fill(curr_alpha);
-	fill(120,200,0, curr_alpha);
+	fill(0,153,57, curr_alpha);
 	endShape(CLOSE);
 
 	stroke(255);
@@ -323,7 +330,7 @@ function updateIter() {
 	/// number of curve to curve transition frames
 	///////////////////////////////////////////////////////////////////// 
 	// Random between a specific min and max
-	iter = randSelect(max_iter - min_iter) + min_iter;
+	iter = randSelect(max_iter - min_iter, 0) + min_iter;
 
 	// // Based on point distances
 	// var d1 = dist(x1p, y1p, x1n, y1n);
@@ -336,9 +343,13 @@ function updateIter() {
 	///////////////////////////////////////////////////////////////////// 
 }
 
-function randSelect(a) {
+function randSelect(a, state) {
 	// return randomGaussian(0.5, 0.3)*a; // mean, sd
-	return normalcdf(0.5, 0.8, random())*a; // mean, sd, to
+	if (state == 1) { // y
+		return normalcdf(0.5, 0.8, random())*a; // mean, sd, to
+	} else { // x
+		return normalcdf(0.5, 1.0, random())*a; // mean, sd, to
+	}
 	// return random(a);
 
 }
