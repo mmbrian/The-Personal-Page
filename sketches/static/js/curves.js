@@ -52,6 +52,8 @@ function setup() {
 
 	xmin = 0, xmax = width;
 	ymin = 0, ymax = height;
+	// xmin = 0, xmax = 2048;
+	// ymin = 0, ymax = 2048;
 
 	x1n = randX(), x2n = randX(), x3n = randX(), x4n = randX();
 	y1n = randY(), y2n = randY(), y3n = randY(), y4n = randY();
@@ -66,6 +68,9 @@ function setup() {
 	fixCurves();
 
 	updateIter();
+
+	// blendMode(REPLACE);
+	blendMode(BLEND);
 }
 
 function fixCurves() {
@@ -140,8 +145,10 @@ function mouseDragged() {
 function keyPressed() {
 	switch (keyCode) {
 		case 32: // Space key
-		case ENTER: // enter key
 			restart();
+			break;
+		case ENTER: // enter key
+			saveCanvas()
 			break;
 		default:
 			break;
@@ -172,8 +179,11 @@ function restart() {
 
 	curr_alpha_step = 1;
 	last_frame = -1;
+
+
 }
 function draw() {
+	// background(255); 
 	if (frameCount > 3*fps && curr_alpha_step <= alpha_steps){
 		if (last_frame < 0) {
 			last_frame = frameCount;
@@ -320,7 +330,7 @@ function updateTransitionCurves() {
 	// 	p1c1y = randY(), p2c1y = randY(), p3c1y = randY(), p4c1y = randY();
 	// 	p1c2y = randY(), p2c2y = randY(), p3c2y = randY(), p4c2y = randY();
 
-	// 	fixCurves();
+	// 	// fixCurves();
 	// }
 	///////////////////////////////////////////////////////////////////// 
 }
