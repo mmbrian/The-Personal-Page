@@ -4,6 +4,8 @@
 // Curved Partitions
 
 // TODO:
+// 0. blurr boxes based on their depth
+// 0.5 change the size of boxes always as they move in V cycles (small > large > small) to simulate depth and perspective.
 // 1. alpha changes rather rapidly as the order of layers changes. make it smooth.
 
 //// Main Part ///////////////////////////////////
@@ -37,10 +39,9 @@ var boxes_a;
 var min_alpha = 255;
 var max_alpha = 255;
 
-// var min_rotation_v = 0.1;
-// var max_rotation_v = 0.5;
-// var boxes_rotation_speed;
-// var boxes_r;
+
+var circle_diameter = 100;
+var circle_clr;
 
 
 function setup() {
@@ -50,6 +51,8 @@ function setup() {
 	createCanvas(windowWidth, windowHeight);
 	hw = width / 2.;
 	hh = height / 2.;
+
+	circle_clr = color(0,0,0, 255);
 
 	boxes_x = new Array(nboxes);
 	boxes_y = new Array(nboxes);
@@ -81,6 +84,10 @@ function setup() {
 	}
 
 	// angleMode(DEGREES); // Change the mode to DEGREES
+
+	// required for rect-circle intersection
+	rectMode(CORNER);
+	ellipseMode(CENTER);
 
 	blendMode(MULTIPLY); 
 	// blendMode(REPLACE); 
@@ -157,6 +164,8 @@ function main() {
 	// background(255);
 	if (!pause)
 		animateBoxes();
+
+	var cr = 0, cg = 0, cb = 0, ca = 0, nhit = 0;
 	for (var i=0; i<nboxes; i++) {
 		push();  // Start a new drawing state
 
@@ -171,8 +180,34 @@ function main() {
 		rect(0, 0, boxes_s[i], boxes_s[i]);
 
 		pop();  // Restore original state
+
+		// check if box intersects circle
+		var hit = collideRectCircle(boxes_x[i], boxes_y[i],boxes_s[i],boxes_s[i],hw, hh,circle_diameter);
+		if (hit) {
+			nhit++;
+			cr = cr + boxes_clr[i]._getRed();
+			cg = cg + boxes_clr[i]._getGreen();
+			cb = cb + boxes_clr[i]._getBlue();
+			ca = ca + boxes_clr[i]._getAlpha();
+		}
 	}
-	
+
+
+	// push();
+	noStroke();
+
+	if (nhit > 0) {
+		circle_clr = lerpColor(circle_clr, color(cr/nhit, cg/nhit, cb/nhit, 255), 0.3);
+		// circle_clr = color(cr/nhit, cg/nhit, cb/nhit, ca/nhit);
+	} else {
+		// circle_clr = lerpColor(circle_clr, color(0,0,0,255), 0.01);
+		circle_clr = color(0, 0, 0);
+		// circle_clr = color(255, 255, 255);
+	}
+
+	fill(circle_clr);
+	ellipse(hw, hh, circle_diameter, circle_diameter);
+	// pop();
 }
 
 
