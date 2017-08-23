@@ -20,7 +20,7 @@ var fps = 60;
 var last_frame = -1;
 var pause = false;
 
-var nboxes = 50;
+var nboxes = 25;
 var min_side = 7;
 var max_side = 250;
 var boxes_x;
@@ -52,7 +52,7 @@ function setup() {
 	hw = width / 2.;
 	hh = height / 2.;
 
-	circle_clr = color(0,0,0, 255);
+	circle_clr = color(0,0,0);
 
 	boxes_x = new Array(nboxes);
 	boxes_y = new Array(nboxes);
@@ -189,6 +189,12 @@ function main() {
 			cg = cg + boxes_clr[i]._getGreen();
 			cb = cb + boxes_clr[i]._getBlue();
 			ca = ca + boxes_clr[i]._getAlpha();
+
+			// if (boxes_s[i] < circle_diameter) { // circle grows
+			// 	circle_diameter++;
+			// } else { // circle shrinks
+			// 	circle_diameter--;
+			// }
 		}
 	}
 
@@ -197,15 +203,15 @@ function main() {
 	noStroke();
 
 	if (nhit > 0) {
-		circle_clr = lerpColor(circle_clr, color(cr/nhit, cg/nhit, cb/nhit, 255), 0.3);
+		circle_clr = lerpColor(circle_clr, color(cr/nhit, cg/nhit, cb/nhit), 0.13);
+		circle_diameter--;
 		// circle_clr = color(cr/nhit, cg/nhit, cb/nhit, ca/nhit);
 	} else {
-		// circle_clr = lerpColor(circle_clr, color(0,0,0,255), 0.01);
-		circle_clr = color(0, 0, 0);
-		// circle_clr = color(255, 255, 255);
+		circle_clr = lerpColor(circle_clr, color(255,255,255), 0.05);
+		circle_diameter++;
 	}
 
-	fill(circle_clr);
+	fill(circle_clr._getRed(),circle_clr._getGreen(),circle_clr._getBlue(), 255);
 	ellipse(hw, hh, circle_diameter, circle_diameter);
 	// pop();
 }
