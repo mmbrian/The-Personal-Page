@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+	    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<script src="static/js/libraries/jquery.js"></script>
+		<script src="static/js/libraries/jquery.transit.min.js"></script>
+		<script src="static/js/libraries/jquery.riddle.js"></script>
+
+		<!-- Bootstrap Core JavaScript -->
+	    <script src="static/js/libraries/bootstrap.js"></script>
+	    <!-- Bootstrap Core CSS -->
+	    <link href="static/css/bootstrap.css" rel="stylesheet">
+
+	    <link href='http://fonts.googleapis.com/css?family=Handlee|Josefin+Sans:300' rel='stylesheet' type='text/css'>
+
+	    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+	    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+	    <!--[if lt IE 9]>
+	        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+	        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+	    <![endif]-->
+
+		<style type="text/css">
+			body {
+				margin-top: 50px;
+				margin-bottom: 50px;
+				overflow: hidden;
+				background-color:#000;
+			}
+
+			.row {
+				margin-right: 0px !important;
+  				margin-left: 0px !important;
+			}
+
+			#preloader {
+				position: fixed; 
+				left: 0; 
+				top: 0; 
+				right:0;
+            	bottom:0;
+				background-color:#000;
+				z-index:9999; /* makes sure it stays on top */
+			}
+			#status {
+				position:absolute;
+	            text-align: center;
+	            vertical-align: center;
+	            width: 100%;
+	            top: 50%; 
+				margin-top: -75px; /* half of preloader's height */
+			}
+
+			#preloader_text {
+				position:fixed;
+	            text-align: center;
+	            vertical-align: center;
+	            top: 50%; 
+	            left: 50%;
+	            margin-left: -100px; /* half of svg width */
+	            margin-top: -50px; /* half of svg height */
+			}
+
+			.riddle_bg {
+				position: fixed;
+
+
+			    top: 50%;
+			    left: 50%;
+			    -webkit-transform: translate(-50%, -50%);
+			    transform: translate(-50%, -50%);
+			    
+			    /*background-image: url('static/other/riddle/paper_landscape.png') no-repeat center center fixed;*/
+			    /*background-image: url('static/other/riddle/paper_landscape.png');*/
+			    /*-webkit-background-size: cover;
+		        -moz-background-size: cover;
+		        -o-background-size: cover;
+		        background-size: cover;*/
+		        -webkit-background-size: 100% 100%;
+		        -moz-background-size: 100% 100%;
+		        -o-background-size: 100% 100%;
+		        background-size: 100% 100%;
+
+			    width: 100%;
+			    height: 100%;
+			}
+
+			#riddle_text {
+				font-family: 'Handlee', cursive;
+				text-align: justify;
+				/*font-weight: bold;*/
+				font-size: 1.6em;
+
+				position: fixed;
+			    top: 50%;
+			    left: 50%;
+			    -webkit-transform: translate(-50%, -50%);
+			    transform: translate(-50%, -50%);
+			}
+
+			#riddle_trigger {
+				font-family: 'Josefin Sans', sans-serif;
+				margin: 0 auto;
+				display: block;
+			}
+		</style>
+
+		<script type="text/javascript">
+			var canvasWidth = 0;
+			var hCH, rhCH, hCW;
+			// var npts = 13;
+			var npts;
+			var speed = 1 * .1;
+			var xarr = [];
+
+			var display_wave = true;
+			var initiating_wave = true;
+			var wave_length = 0;
+			var wave_lspeed = 1;
+			var wave_lacceleration = 1.05;
+			var wave_maxl;
+
+			var wave_height = 0;
+			var wave_hspeed = 1;
+			var wave_hacceleration = 1.05;
+			var wave_maxh;			
+
+			var kill_wave = false;
+			var dead_count = 0;
+
+			var minX, maxX;
+			var dirs = [1, -1];
+
+			var initPts = function() {
+				xarr = [];
+				initiating_wave = true;
+				wave_length = 0;
+				wave_lspeed = 1;
+
+				wave_height = 0;
+				wave_hspeed = 1;
+
+				minX = hCW - wave_maxl;
+				maxX = hCW + wave_maxl;
+
+				// initial points
+				xarr.push(minX - (maxX - minX));
+				xarr.push(minX);
+				xarr.push(maxX);
+				xarr.push(maxX + (maxX - minX));
+				npts = 4;
+			};
+
+			var mutate = function() {
+				if (npts > 7)  {
+					for (var i = 0; i < npts; i++) {
+						// xarr[i] += 0.5;
+						xarr[i] -= 0.5;
+					}
+					// if (xarr[0] >= minX) {
+					// 	xarr.unshift(xarr[0] - (xarr[1] - xarr[0]));
+					// 	xarr.pop();
+					if (xarr[npts-1] <= maxX) {
+						xarr.push(xarr[npts-1] + (xarr[1] - xarr[0]));
+						xarr.shift();
+						dirs[0] = -dirs[0]; dirs[1] = -dirs[1];
+					}	
+				} else {
+					var diff;
+					var lerp = 0.005;
+					for (var i = 0; i < npts; i++) {
+						diff = hCW - xarr[i];
+						xarr[i] += lerp * diff;
+					}
+					if (xarr[0] >= minX) {
+						xarr.push(xarr[npts-1] + xarr[1] - xarr[0]);
+						xarr.unshift(xarr[0] - (xarr[1] - xarr[0]));
+						npts+=2;
+						dirs[0] = -dirs[0]; dirs[1] = -dirs[1];
+					}
+				}
+				if (kill_wave) {
+					if (wave_height < 1) {
+						dead_count = npts;
+					}
+					wave_height -= wave_hspeed;
+					wave_hspeed /= wave_hacceleration;
+				}
+			};
+
+			
+			var drawWave = function() {
+				if (!display_wave) return;	
+
+				// context.beginPath();
+				// context.fillStyle = 'white';
+				// context.fillRect(0, 0, canvasWidth, rhCH*2);
+				// context.closePath();
+
+				// Setting the width or height of a <canvas> element will erase its contents // and reset all the properties of its drawing context to their default values
+				context.canvas.width = context.canvas.width;
+				context.lineWidth = 1.5;
+
+				if (initiating_wave) {
+					if (wave_length >= wave_maxl) {
+						wave_length = wave_maxl;
+						initiating_wave = false;
+					} else {
+						wave_length += wave_lspeed;
+						wave_lspeed *= wave_lacceleration;	
+					}
+
+					context.beginPath();
+					context.strokeStyle = '#FFFFFF';
+					context.moveTo(hCW - wave_length, rhCH);
+					context.lineTo(hCW + wave_length, rhCH);
+					context.stroke();
+					context.closePath();
+				} else {
+					if (dead_count < npts - 1 ) {
+						if (wave_height >= wave_maxh) {
+							wave_height = wave_maxh;
+						} else {
+							wave_height += wave_hspeed;
+							wave_hspeed *= wave_hacceleration;	
+						}
+
+						context.beginPath();
+						context.strokeStyle = '#000000';
+						context.moveTo(hCW - wave_maxl, 0);
+						context.lineTo(hCW + wave_maxl, 0);
+						context.lineTo(hCW + wave_maxl, rhCH*2);
+						context.lineTo(hCW - wave_maxl, rhCH*2);
+						context.stroke();
+						context.closePath();
+						context.clip();
+
+						context.beginPath();
+						context.strokeStyle = '#FFFFFF';
+						// context.fillStyle = "#FFFFFF";
+						// context.lineJoin = 'round';
+						var y_factor = 1;
+						var x_factor = 0.5;
+						context.moveTo(xarr[0], rhCH + dirs[0] * wave_height);
+						for (var i = 1; i<npts; i++) {
+							var cp1y = rhCH + dirs[(i-1)%2] * wave_height * y_factor;
+							var cp2y = rhCH + dirs[i%2] * wave_height * y_factor;
+							var cp1x = xarr[i-1] + x_factor * (xarr[i] - xarr[i-1]);
+							var cp2x = xarr[i-1] + (1-x_factor) * (xarr[i] - xarr[i-1]);
+							context.bezierCurveTo(
+								cp1x, cp1y, cp2x, cp2y,
+								xarr[i], rhCH + dirs[i%2] * wave_height);
+						}					
+						context.stroke();
+						context.closePath();
+						// context.fill();
+
+						context.beginPath();
+						context.moveTo(xarr[0], rhCH + -dirs[0] * wave_height);
+						for (var i = 1; i<npts; i++) {
+							var cp1y = rhCH + -dirs[(i-1)%2] * wave_height * y_factor;
+							var cp2y = rhCH + -dirs[i%2] * wave_height * y_factor;
+							var cp1x = xarr[i-1] + x_factor * (xarr[i] - xarr[i-1]);
+							var cp2x = xarr[i-1] + (1-x_factor) * (xarr[i] - xarr[i-1]);
+							context.bezierCurveTo(
+								cp1x, cp1y, cp2x, cp2y,
+								xarr[i], rhCH + -dirs[i%2] * wave_height);
+						}
+						context.stroke();
+						context.closePath();
+						// context.fill();
+					} else { // all dead
+						if (wave_length < 0) {
+							wave_length = 0;
+							display_wave = false;
+							// terminate preloader
+							clearInterval(preloaderTask);
+							// window.signature.animate();
+							setTimeout(function() {
+								jQuery('#status').fadeOut(); // will first fade out the loading animation
+					            jQuery('#preloader').delay(550).fadeOut('slow'); // will fade out the white DIV that covers the website.
+					            jQuery('body').delay(550).css({'overflow':'visible'});
+							}, window.signature_delay);
+						} else {
+							wave_length -= wave_lspeed;
+							wave_lspeed /= wave_lacceleration;	
+						}
+						context.beginPath();
+						context.strokeStyle = '#FFFFFF';		
+						context.moveTo(hCW - wave_length, rhCH);
+						context.lineTo(hCW + wave_length, rhCH);
+						context.stroke();
+						context.closePath();
+					}
+				}
+			}; 
+
+			var resize_canvas = function() {
+				if (!display_wave) return;
+	            var canvas = document.getElementById("myCanvas");
+				var context = canvas.getContext('2d');
+	            if (context.canvas.width != window.innerWidth)
+	            {
+	            	context.canvas.width  = window.innerWidth;
+	            	canvasWidth = context.canvas.width;
+	            	hCW = canvasWidth/2;
+	            	hCH = 80/2;
+	            	rhCH = 150/2;
+	            	// wave_maxl = hCW;
+	            	wave_maxl = Math.min(100, hCW);
+	            	wave_maxh = hCH;
+	            	initPts();
+	            }
+	        };
+
+	        var preloaderTask;
+	        var canvas, context;
+			$(document).ready(function() {
+				canvas = document.getElementById('myCanvas');
+				context = canvas.getContext('2d');
+
+				resize_canvas();
+				initPts();
+				preloaderTask = setInterval(function() {
+					if (!initiating_wave)
+						mutate();
+					drawWave();
+				}, 10);
+
+				window.signature.initialize();
+			});
+
+			//<![CDATA[
+	        jQuery(window).load(function() { // makes sure the whole site is loaded
+	        	console.log('page loaded');
+	        	jQuery('#riddle_text').riddle({
+				    'trigger' : 'riddle_trigger'
+				});
+
+				$('<img/>').attr('src', 'static/other/riddle/paper_landscape.png').on('load', function() {
+				   $(this).remove(); // prevent memory leaks 
+					console.log('image loaded')
+		        	setTimeout(function() {
+		        		$('.riddle_bg').css('background-image', 'url(static/other/riddle/paper_landscape.png)');
+						kill_wave = true;	
+					// }, 4500);
+					}, 4500);				   
+				});
+
+	        })
+	        //]]>
+		</script>
+
+		<script type="text/javascript">
+			window.signature_delay = 0;
+			window.signature = {
+				initialize: function() {
+				    $('svg.signature').each(function() {
+						var delay, length, path, paths, previousStrokeLength, speed, _i, _len, _results;
+						paths = $('path, circle, rect', this);
+						delay = 0;
+						for (_i = 0, _len = paths.length; _i < _len; _i++) {
+							path = paths[_i];
+							length = path.getTotalLength();
+							previousStrokeLength = speed || 0;
+							speed = length < 100 ? 20 : Math.floor(length);
+							delay += previousStrokeLength + 100;
+							$(path)
+							    .css('transition', 'none')
+							    .attr('data-length', length)
+							    .attr('data-speed', speed)
+							    .attr('data-delay', delay)
+							    .attr('stroke-dashoffset', length)
+							    .attr('stroke-dasharray', length + ',' + length);
+						}
+						// window.signature_delay = delay + speed + 100;
+						window.signature_delay = 0;
+					});
+				},
+				animate: function() {
+					$('svg.signature').each(function() {
+						var delay, length, path, paths, speed, _i, _len, _results;
+						paths = $('path, circle, rect', this);
+						for (_i = 0, _len = paths.length; _i < _len; _i++) {
+							path = paths[_i];
+							length = $(path).attr('data-length');
+							speed = $(path).attr('data-speed');
+							delay = $(path).attr('data-delay');
+							$(path)
+							    .css('transition', 
+							            'stroke-dashoffset ' + speed + 'ms ' + delay + 'ms linear')
+							    .attr('stroke-dashoffset', '0');
+						}
+					});
+				}
+			};
+		</script>
+	</head>
+
+	<!-- <body onload="generateSVG()"> -->
+	<body onresize="resize_canvas()">
+		<div id="preloader">
+			<div id="status">
+				<canvas id="myCanvas" height='150'></canvas>
+				
+
+
+				<svg id="preloader_text" class="signature" xmlns="http://www.w3.org/2000/svg" viewBox="34.924 351.353 548.489 159.86" width=200 height=100>
+			      <path fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M51.494,355.859c-0.361,6.059-0.928,154.471,0.112,139.244"/>
+			      <path fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M78.591,407.725c1.312,22.307-22.823,30.685-40.917,38.995v0.438c28.433,6.559,63.44,14.872,83.997,37.178"/>
+			      <path fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M107.581,428.161c-10.663-3.553-25.783,30.933-12.163,31.759c9.906,0.412,10.873-18.834,13.134-26.911 c-5.65,11.058,3.828,48.292,20.075,6.995c-11.509,10.832,17.602,55.514,27.12-39.959c-2.612,27.794-5.091,45.328,6.053,56.885 c9.493,9.906,24.097,5.309,26.899-6.503c9.349-39.39,2.886-89.151-4.863-88.502c-7.76,0.648-12.929,44.588-4.217,79.835 c2.759,11.161,9.906,22.289,23.114,24.354c14.859,2.475,13.208-12.385,17.335-21.466c1.238,5.367,1.238,11.971,7.842,12.795 c7.429,1.238,9.492-9.906,14.446-9.906c2.063,0,4.127,4.129,6.192,4.541c3.302,1.238,3.715-0.412,7.017-1.651 c19.812-6.19,17.879-0.059,38.517-0.059"/>
+			      <path fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M137.931,434.742c14.447-2.475,28.894-3.714,43.753-4.128"/>
+			      <path fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M323.739,390.271c7.861-15.198-23.06-13.102-28.826-1.571c-13.101,26.204,37.734,46.643,44.023,68.653 c9.435,33.017-49.264,34.063-67.605,21.487c-11.53-8.386-2.096-13.626,8.385-16.771"/>
+			      <path fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M355.25,448.722c-5.261,16.234,3.377,51.195,12.721,59.741c0,0,0.649-26.498-10.497-40.877"/>
+			      <path fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M366.466,462.687c6.728,0.814,33.816,1.509,39.618-16.217c5.733-17.524-34.122-12.104-46.724-6.919 c-4.088,1.683-12.966,5.606-12.708,12.208c0.535,13.62,37.153,12.974,56.324,8.02s23.665-9.646,25.908-14.53 c-4.859,0.813-5.232,10.987-1.495,14.243c4.86,4.069,6.729-2.442,9.718-6.104c0.747,3.256,1.494,6.104,2.989,8.952 c3.738-2.848,5.608-10.173,10.841-9.766c4.485,0,3.991,5.186,8.477,5.594c4.111,0.408,8.078-11.094,22.939-10.447 c-8.399-1.615-24.232,8.725-13.569,12.278c11.309,2.907,13.178-9.46,14.674-14.343c1.494-5.29,6.729-39.826,0.748-43.896 c-4.485-2.849-5.232,5.696-5.607,9.359c-1.12,11.395,2.617,32.093,10.093,40.64c7.476,8.952,26.537,12.207,32.892-1.628 c4.861-10.986-8.597-17.498-10.091-5.289c-2.99,23.195,22.56,15.073,30.566,7.922c13.571-12.116,11.147-86.235,2.259-86.761 c-8.071-0.478-24.718,94.514,36.346,102.269"/>
+			      <path fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M432.622,431.008c0.373-0.407,0.373-1.222,0.373-2.035"/>
+			      <path fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M130.66,421.731c0.373-0.407,0.373-1.221,0.373-2.035"/>
+			    </svg>
+			</div>
+		</div>
+
+		<div id="container">
+			<div class="row riddle_bg">
+				<h3 id="riddle_trigger" style="cursor: pointer; cursor: hand; text-align: center; margin-top: 45px; border-bottom: 1px solid black; width: 125px;">Click Here</h3>
+
+				<div id="riddle_text" class="riddle_text">
+<p>Caring for one another naturally comes when we get to know each other for some time. I'm assuming we see each other special enough that is worthy of knowing. By "Caring" I specifically mean thinking about each other, trying to be good, to do good, and to listen to each other. </p>
+<p>Perhaps at first we simply care without any expectations, basically out of love. This may even hold up to a certain extent, independent of time… no expectations... but our level of caring tends to increase sometimes and with that comes a natural expectation. Expecting back is perhaps not the reason we first give something but after a while we somehow expect it back. Just like that!</p>
+
+				</div>
+			</div>
+		</div>
+
+	</body>
+
+</html>
