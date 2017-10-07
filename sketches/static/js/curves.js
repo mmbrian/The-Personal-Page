@@ -148,7 +148,7 @@ function keyPressed() {
 			restart();
 			break;
 		case ENTER: // enter key
-			saveCanvas()
+			saveCanvas();
 			break;
 		default:
 			break;

@@ -4,8 +4,7 @@
 // Curved Partitions
 
 // TODO:
-// 1. generate splines (or C1 connected cubic bezier curves) of random length instead
-// of single cubic bezier curves from top to bottom
+// DEBUG
 
 //// Main Part ///////////////////////////////////
 
