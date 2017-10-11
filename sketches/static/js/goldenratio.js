@@ -28,8 +28,6 @@ var lines_x1;
 var lines_y1;
 var lines_x2;
 var lines_y2;
-var lines_w;
-var lines_h;
 var curr_n_lines = 0;
 
 var rotation_angle;
@@ -64,8 +62,6 @@ function createLines() {
 	lines_x2 = new Array(n_lines*depth);
 	lines_y1 = new Array(n_lines*depth);
 	lines_y2 = new Array(n_lines*depth);
-	lines_w = new Array(n_lines*depth);
-	lines_h = new Array(n_lines*depth);
 	var c = 0;
 
 	var d;
@@ -88,8 +84,6 @@ function createLines() {
 					lines_y1[c] = side_y + curr_height-i*d;
 					lines_x2[c] = side_x+(i+1)*d;
 					lines_y2[c] = side_y;
-					lines_w[i] = curr_width;
-					lines_h[i] = curr_height;
 					c++;
 				}
 				side_x = side_x + curr_width;
@@ -106,8 +100,6 @@ function createLines() {
 					lines_y1[c] = side_y;
 					lines_x2[c] = side_x;
 					lines_y2[c] = side_y+(i+1)*d;
-					lines_w[i] = curr_width;
-					lines_h[i] = curr_height;
 					c++;
 				}
 				side_x = side_x;
@@ -124,8 +116,6 @@ function createLines() {
 					lines_y1[c] = side_y-curr_height+i*d;
 					lines_x2[c] = side_x-(i+1)*d;
 					lines_y2[c] = side_y;
-					lines_w[i] = curr_width;
-					lines_h[i] = curr_height;
 					c++;
 				}
 				side_x = side_x - curr_width;
@@ -142,8 +132,6 @@ function createLines() {
 					lines_y1[c] = side_y;
 					lines_x2[c] = side_x;
 					lines_y2[c] = side_y-(i+1)*d;
-					lines_w[i] = curr_width;
-					lines_h[i] = curr_height;
 					c++;
 				}
 				side_x = side_x;
@@ -199,10 +187,6 @@ function main() {
 	stroke(0, 255);
 	push();
 	translate(min_x, min_y);
-
-	// var s = 1.+curr_n_lines/float(lines_x1.length);
-	// scale(s);
-	// translate(-((s-1.)*width)/2., -((s-1.)*height)/2.);
 
 	for (var i = 0; i < curr_n_lines; i++) {
 		line(lines_x1[i], lines_y1[i], lines_x2[i], lines_y2[i]);
