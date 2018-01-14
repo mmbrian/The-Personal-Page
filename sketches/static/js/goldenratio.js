@@ -70,12 +70,16 @@ function createLines() {
 	var curr_width = w;
 	var curr_height = h;
 	var side = 1; // top left, top right, bottom right, bottom left
-	var box_width;
+	var box_width = curr_height;
+	var old_box_width;
 
 	for (var curr_depth = 0; curr_depth < depth; curr_depth++) {
+		old_box_width = box_width;
+		// n_lines = n_lines - 2;
 		switch (side) {
 			case 1:
 				box_width = curr_height;
+				// n_lines = n_lines * (box_width/float(old_box_width));
 				// line(side_x + box_width, side_y, side_x + box_width, side_y + box_width);
 				d = box_width/float(n_lines);
 				for (var i = 0; i<n_lines; i++) {
@@ -92,6 +96,7 @@ function createLines() {
 				break;
 			case 2:
 				box_width = curr_width;
+				// n_lines = n_lines * (box_width/float(old_box_width));
 				// line(side_x - box_width, side_y + box_width, side_x, side_y + box_width);
 				d = box_width/float(n_lines);
 				for (var i = 0; i<n_lines; i++) {
@@ -108,6 +113,7 @@ function createLines() {
 				break;
 			case 3:
 				box_width = curr_height;
+				// n_lines = n_lines * (box_width/float(old_box_width));
 				// line(side_x - box_width, side_y - box_width, side_x - box_width, side_y);
 				d = box_width/float(n_lines);
 				for (var i = 0; i<n_lines; i++) {
@@ -124,6 +130,7 @@ function createLines() {
 				break;
 			case 4:
 				box_width = curr_width;
+				// n_lines = n_lines * (box_width/float(old_box_width));
 				// line(side_x, side_y - box_width, side_x + box_width, side_y- box_width);
 				d = box_width/float(n_lines);
 				for (var i = 0; i<n_lines; i++) {
