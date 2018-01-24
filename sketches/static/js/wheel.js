@@ -22,6 +22,7 @@ var bg_alpha = 30;
 var bg_alpha_step = 10;
 
 var hh, hw;
+var ft;
 
 function setup() {
 	document.assetsLoaded = true;
@@ -53,11 +54,14 @@ function draw() {
     rotate(r);
     for (var i = 0; i < n_lines; i++) {
         push();
-        rotate(PI - (TWO_PI * i / (n_lines - 1)));
+        ft = i / (n_lines - 1);
+        var sr = center_r*sin(degrees(PI - (TWO_PI * ft)))/3.;
+        // var sr = 0;
+        rotate(PI - (TWO_PI * ft));
         // stroke(255*alpha, 255*alpha);
         stroke(255, line_alphas[i]);
         strokeWeight(line_weights[i]);
-        line(0, center_r, 0, center_r + line_lengths[i] * level); // stright vertical line
+        line(0, sr + center_r, 0, sr + center_r + line_lengths[i] * level); // stright vertical line
         pop();
     }
     pop();
